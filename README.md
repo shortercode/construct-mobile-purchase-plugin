@@ -1,14 +1,13 @@
 # Cordova Purchase Plugin
 
-[![Build Status](https://travis-ci.org/j3k0/cordova-plugin-purchase.svg)](https://travis-ci.org/j3k0/cordova-plugin-purchase) [![Coverage Status](https://img.shields.io/coveralls/j3k0/cordova-plugin-purchase.svg)](https://coveralls.io/r/j3k0/cordova-plugin-purchase)
+**Author**: Iain Shorter
 
-**Author**: Jean-Christophe Hoelt - <hoelt@fovea.cc>
+Forked from https://github.com/j3k0/cordova-plugin-purchase 
+Original Author: Jean-Christophe Hoelt - <hoelt@fovea.cc>
 
 ## Summary
 
-This plugin allows **In-App Purchases** to be made from **Cordova and PhoneGap** applications, on **Android**, **iOS** and **Windows** (Store/Phone)
-
-It lets you handle all platforms with a single codebase.
+This plugin allows **In-App Purchases** to be made from construct 3 games on iOS and Android.
 
 ## Installation
 
@@ -58,12 +57,6 @@ See [Setup iOS Applications](https://github.com/j3k0/cordova-plugin-purchase/wik
  - **iOS** version 6.0 or higher.
  - **Android** version 2.2 (API level 8) or higher
    - with Google Play client version 3.9.16 or higher
- - **Windows** Store/Phone 8.1 or higher
-
-## Extensions
-
- * [Simple Non-Renewing Subscriptions](https://github.com/j3k0/cordova-non-renewing-subscription)
-   * The easiest way to integrate purchase into an app that only needs a non-renewing subscription.
 
 ## Getting Started
 
