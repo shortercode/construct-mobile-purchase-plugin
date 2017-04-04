@@ -1,4 +1,4 @@
-# Cordova Purchase Plugin
+# Construct 3 Mobile Purchase Plugin
 
 **Author**: Iain Shorter
 
@@ -7,7 +7,7 @@ Original Author: Jean-Christophe Hoelt - <hoelt@fovea.cc>
 
 ## Summary
 
-This plugin allows **In-App Purchases** to be made from construct 3 games on iOS and Android.
+This plugin allows **In-App Purchases** to be made **from Construct** 3 games on iOS and Android.
 
 ## Installation
 
