@@ -1,24 +1,22 @@
 {
-  "name": "cc.fovea.cordova.purchase",
-  "version": "6.1.0",
-  "description": "Cordova Purchase plugin for iOS and Android (AppStore and PlayStore)",
+  "name": "construct mobile purchase",
+  "version": "1.0.0",
+  "description": "Construct 3 IAP plugin for iOS and Android (AppStore and PlayStore)",
   "cordova": {
-    "id": "cc.fovea.cordova.purchase",
+    "id": "construct mobile purchase",
     "platforms": [
       "android",
-      "ios",
-      "wp8"
+      "ios"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/j3k0/cordova-plugin-purchase.git"
+    "url": "https://github.com/shortercode/construct-mobile-purchase-plugin"
   },
   "keywords": [
     "ecosystem:cordova",
     "cordova-android",
     "cordova-ios",
-    "cordova-windows",
     "cordova",
     "phonegap",
     "purchase",
@@ -32,12 +30,12 @@
     "test": "make test-js",
     "coverage": "make test-js-coverage"
   },
-  "author": "Jean-Christophe Hoelt <hoelt@fovea.cc>",
+  "author": "Iain Shorter",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/j3k0/cordova-plugin-purchase/issues"
+    "url": "https://github.com/shortercode/construct-mobile-purchase-plugin/issues"
   },
-  "homepage": "https://github.com/j3k0/cordova-plugin-purchase",
+  "homepage": "https://github.com/shortercode/construct-mobile-purchase-plugin",
   "devDependencies": {
     "cordova": "^6.3.1",
     "eslint": "^3.8.1",
