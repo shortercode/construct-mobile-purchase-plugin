@@ -40,6 +40,8 @@ public class InAppBillingPlugin extends CordovaPlugin {
     Inventory myInventory;
 
     CallbackContext callbackContext;
+	
+	String mPublicKey = "CONSTRUCT_YOUR";
 
 	@Override
 	/**
@@ -65,6 +67,10 @@ public class InAppBillingPlugin extends CordovaPlugin {
 				}
 				// Initialize
 				init(sku);
+			} else if ("setKey".equals(action)) {
+				
+				mPublicKey = data.getString(0);
+				
 			} else if ("getPurchases".equals(action)) {
 				// Get the list of purchases
 				JSONArray jsonSkuList = new JSONArray();
@@ -141,27 +147,12 @@ public class InAppBillingPlugin extends CordovaPlugin {
 		return isValidAction;
 	}
 
-    private String getPublicKey() {
-        int billingKeyFromParam = cordova.getActivity().getResources().getIdentifier("billing_key_param", "string", cordova.getActivity().getPackageName());
-        String ret = "";
-
-        if (billingKeyFromParam > 0) {
-            ret = cordova.getActivity().getString(billingKeyFromParam);
-            if (ret.length() > 0) {
-                return ret;
-            }
-        }
-
-        int billingKey = cordova.getActivity().getResources().getIdentifier("billing_key", "string", cordova.getActivity().getPackageName());
-        return cordova.getActivity().getString(billingKey);
-    }
-
 	// Initialize the plugin
 	private void init(final List<String> skus){
 		Log.d(TAG, "init start");
 		// Some sanity checks to see if the developer (that's you!) really followed the
         // instructions to run this plugin
-        String base64EncodedPublicKey = getPublicKey();
+        String base64EncodedPublicKey = publicKey;
 
 	 	if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR"))
 	 		throw new RuntimeException("Please configure your app's public key.");
