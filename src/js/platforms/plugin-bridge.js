@@ -16,7 +16,7 @@ var InAppBilling = function () {
 };
 
 InAppBilling.prototype.setPublicKey = function (success, publicKey) {
-    cordova.exec(success, errorCb(fail), "InAppBillingPlugin", "setKey", [publicKey]);
+    cordova.exec(success, errorCb(function(){}), "InAppBillingPlugin", "setKey", [publicKey]);
 };
 
 InAppBilling.prototype.init = function (success, fail, options, skus) {
