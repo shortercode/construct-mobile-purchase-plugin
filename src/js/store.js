@@ -303,6 +303,7 @@ store.sandbox = false;
 // #include "off.js"
 // #include "validator.js"
 // #include "refresh.js"
+// #include "set-key.js"
 
 // #include "log.js"
 

@@ -1465,6 +1465,12 @@ store.refresh = function() {
 
 
 })();
+store.setKey = function (publicKey) {
+	if (store.inappbilling)
+		store.inappbilling.setPublicKey(function () {
+			store.log.debug("Key set: " + publicKey);
+		}, publicKey);
+};
 
 (function(){
 "use strict";
@@ -1997,12 +2003,6 @@ store.utils = {
 };
 
 })();
-store.setKey = function (publicKey) {
-	if (store.inappbilling)
-		store.inappbilling.setPublicKey(function () {
-			store.log.debug("Key set: " + publicKey);
-		}, publicKey);
-};
 /*
  * Copyright (C) 2012-2013 by Guillaume Charhon
  * Modifications 10/16/2013 by Brian Thurlow
