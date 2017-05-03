@@ -1,5 +1,6 @@
 // #include "copyright.js"
 // #include "store.js"
+// #include "set-key.js"
 // #include "platforms/plugin-bridge.js"
 // #include "platforms/plugin-adapter.js"
 // #include "platforms/android-productdata.js"

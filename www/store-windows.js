@@ -2014,6 +2014,10 @@ var InAppBilling = function () {
     this.options = {};
 };
 
+InAppBilling.prototype.setPublicKey = function (success, publicKey) {
+    cordova.exec(success, errorCb(function(){}), "InAppBillingPlugin", "setKey", [publicKey]);
+};
+
 InAppBilling.prototype.init = function (success, fail, options, skus) {
 	if (!options)
         options = {};
