@@ -152,14 +152,13 @@ public class InAppBillingPlugin extends CordovaPlugin {
 		Log.d(TAG, "init start");
 		// Some sanity checks to see if the developer (that's you!) really followed the
         // instructions to run this plugin
-        String base64EncodedPublicKey = publicKey;
 
-	 	if (base64EncodedPublicKey.contains("CONSTRUCT_YOUR"))
+	 	if (mPublicKey.contains("CONSTRUCT_YOUR"))
 	 		throw new RuntimeException("Please configure your app's public key.");
 
 	 	// Create the helper, passing it our context and the public key to verify signatures with
         Log.d(TAG, "Creating IAB helper.");
-        mHelper = new IabHelper(cordova.getActivity().getApplicationContext(), base64EncodedPublicKey);
+        mHelper = new IabHelper(cordova.getActivity().getApplicationContext(), mPublicKey);
 
         // enable debug logging (for a production application, you should set this to false).
         mHelper.enableDebugLogging(ENABLE_DEBUG_LOGGING);
