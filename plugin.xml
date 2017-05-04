@@ -25,8 +25,8 @@ SOFTWARE.
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="cc.fovea.cordova.purchase"
-    version="1.0.2">
+    id="construct-mobile-purchase"
+    version="1.0.4">
 
     <name>Purchase</name>
 	<description>Cordova Purchase plugin for iOS (AppStore), Android (PlayStore) and Windows</description>
@@ -85,11 +85,6 @@ SOFTWARE.
 			</feature>
         </config-file>
 
-        <source-file src="src/android/billing_key_param.xml" target-dir="res/values/" />
-        <config-file target="res/values/billing_key_param.xml" parent="/*">
-            <string name="billing_key_param">$BILLING_KEY</string>
-        </config-file>
-
         <!-- In-app Billing Library -->
 		<source-file src="src/android/com/android/vending/billing/IInAppBillingService.aidl" target-dir="src/com/android/vending/billing" />
 
@@ -106,18 +101,4 @@ SOFTWARE.
 		<source-file src="src/android/com/smartmobilesoftware/util/Security.java" target-dir="src/com/smartmobilesoftware/util" />
 		<source-file src="src/android/com/smartmobilesoftware/util/SkuDetails.java" target-dir="src/com/smartmobilesoftware/util" />
     </platform>
-    
-    <!-- windows -->
-	<platform name="windows">
-		<js-module src="www/store-windows.js" name="InAppPurchase">
-			<clobbers target="store" />
-		</js-module>
-		<js-module src="src/windows/InAppPurchaseProxy.js" name="InAppPurchaseProxy">
-			<merges target="" />
-		</js-module>
-		
-	</platform>
-<!--
-vim: ts=4:sw=4:et
--->
 </plugin>
