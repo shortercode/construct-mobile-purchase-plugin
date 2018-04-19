@@ -563,6 +563,8 @@ store.Product.prototype.verify = function() {
         store._validator(that, function(success, data) {
             store.log.debug("verify -> " + JSON.stringify(success));
             if (success) {
+                if (that.expired)
+                    that.set("expired", false);
                 store.log.debug("verify -> success: " + JSON.stringify(data));
                 store.utils.callExternal('verify.success', successCb, that, data);
                 store.utils.callExternal('verify.done', doneCb, that);
@@ -570,6 +572,7 @@ store.Product.prototype.verify = function() {
             }
             else {
                 store.log.debug("verify -> error: " + JSON.stringify(data));
+                if (!data) data = {};
                 var msg = (data && data.error && data.error.message ? data.error.message : '');
                 var err = new store.Error({
                     code: store.ERR_VERIFICATION_FAILED,
@@ -589,6 +592,7 @@ store.Product.prototype.verify = function() {
                         });
                     }
                     else {
+                        that.set("expired", true);
                         store.error(err);
                         store.utils.callExternal('verify.error', errorCb, err);
                         store.utils.callExternal('verify.done', doneCb, that);
@@ -1379,10 +1383,14 @@ store._validator = function(product, callback, isPrepared) {
             method: 'POST',
             data: product,
             success: function(data) {
+                store.log.debug("validator success, response: " + JSON.stringify(data));
                 callback(data && data.ok, data.data);
             },
-            error: function(status, message) {
-                callback(false, "Error " + status + ": " + message);
+            error: function(status, message, data) {
+                var fullMessage = "Error " + status + ": " + message;
+                store.log.debug("validator failed, response: " + JSON.stringify(fullMessage));
+                store.log.debug("body => " + JSON.stringify(data));
+                callback(false, fullMessage);
             }
         });
     }
@@ -1538,6 +1546,9 @@ store.log = {
 
 })();
 
+/// # Random Tips
+///
+/// - Sometimes during development, the queue of pending transactions fills up on your devices. Before doing anything else you can set `store.autoFinishTransactions` to `true` to clean up the queue. Beware: **this is not meant for production**.
 ///
 /// # internal APIs
 /// USE AT YOUR OWN RISKS
@@ -1629,7 +1640,7 @@ store.Product.prototype.stateChanged = function() {
         this.trigger(this.state);
 };
 
-/// ### aliases to `store` methods, added for conveniance.
+/// ### aliases to `store` methods, added for convenience.
 store.Product.prototype.on = function(event, cb) {
     store.when(this.id, event, cb);
 };
@@ -2009,6 +2020,7 @@ store.utils = {
             if (xhr.readyState === 4)
                 store.utils.callExternal('ajax.done', doneCb);
         };
+        xhr.setRequestHeader("Accept", "application/json");
         store.log.debug('ajax -> send request to ' + options.url);
         if (options.data) {
             xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
@@ -2118,8 +2130,8 @@ InAppPurchase.prototype.init = function (options, success, error) {
         };
     }
 
-    if (options.noAutoFinish) {
-        exec('noAutoFinish', [], noop, noop);
+    if (options.autoFinish) {
+        exec('autoFinish', [], noop, noop);
     }
 
     var that = this;
@@ -2331,7 +2343,7 @@ InAppPurchase.prototype.load = function (productIds, success, error) {
  * @param {String} transactionId
  *    Identifier of the transaction to finish.
  *
- * You have to call this method manually when using the noAutoFinish option.
+ * You have to call this method manually except when using the autoFinish option.
  */
 InAppPurchase.prototype.finish = function (transactionId) {
     exec('finishTransaction', [transactionId], noop, noop);
@@ -2626,7 +2638,7 @@ store.when("requested", function(product) {
 store.when("finished", function(product) {
     store.log.debug("ios -> finishing " + product.id + " (a " + product.type + ")");
     storekitFinish(product);
-    if (product.type === store.CONSUMABLE || product.type === store.NON_RENEWING_SUBSCRIPTION) {
+    if (product.type === store.CONSUMABLE || product.type === store.NON_RENEWING_SUBSCRIPTION || product.expired) {
         product.set("state", store.VALID);
         setOwned(product.id, false);
     }
@@ -2737,7 +2749,7 @@ function storekitInit() {
     store.log.debug("ios -> initializing storekit");
     storekit.init({
         debug:    store.verbosity >= store.DEBUG ? true : false,
-        noAutoFinish: true,
+        autoFinish: store.autoFinishTransactions,
         error:    storekitError,
         purchase: storekitPurchased,
         purchasing: storekitPurchasing,

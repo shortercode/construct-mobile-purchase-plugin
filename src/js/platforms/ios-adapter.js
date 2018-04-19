@@ -49,7 +49,7 @@ store.when("requested", function(product) {
 store.when("finished", function(product) {
     store.log.debug("ios -> finishing " + product.id + " (a " + product.type + ")");
     storekitFinish(product);
-    if (product.type === store.CONSUMABLE || product.type === store.NON_RENEWING_SUBSCRIPTION) {
+    if (product.type === store.CONSUMABLE || product.type === store.NON_RENEWING_SUBSCRIPTION || product.expired) {
         product.set("state", store.VALID);
         setOwned(product.id, false);
     }
@@ -160,7 +160,7 @@ function storekitInit() {
     store.log.debug("ios -> initializing storekit");
     storekit.init({
         debug:    store.verbosity >= store.DEBUG ? true : false,
-        noAutoFinish: true,
+        autoFinish: store.autoFinishTransactions,
         error:    storekitError,
         purchase: storekitPurchased,
         purchasing: storekitPurchasing,

@@ -158,6 +158,8 @@ store.Product.prototype.verify = function() {
         store._validator(that, function(success, data) {
             store.log.debug("verify -> " + JSON.stringify(success));
             if (success) {
+                if (that.expired)
+                    that.set("expired", false);
                 store.log.debug("verify -> success: " + JSON.stringify(data));
                 store.utils.callExternal('verify.success', successCb, that, data);
                 store.utils.callExternal('verify.done', doneCb, that);
@@ -165,6 +167,7 @@ store.Product.prototype.verify = function() {
             }
             else {
                 store.log.debug("verify -> error: " + JSON.stringify(data));
+                if (!data) data = {};
                 var msg = (data && data.error && data.error.message ? data.error.message : '');
                 var err = new store.Error({
                     code: store.ERR_VERIFICATION_FAILED,
@@ -184,6 +187,7 @@ store.Product.prototype.verify = function() {
                         });
                     }
                     else {
+                        that.set("expired", true);
                         store.error(err);
                         store.utils.callExternal('verify.error', errorCb, err);
                         store.utils.callExternal('verify.done', doneCb, that);
