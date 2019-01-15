@@ -5,14 +5,6 @@
 Forked from https://github.com/j3k0/cordova-plugin-purchase
 Original Author: Jean-Christophe Hoelt - <hoelt@fovea.cc>
 
-**Active Contributors**:
-
- * [Josef Fröhle](https://github.com/Dexus)
-
----
-
-Need professional help and support? [Contact us](mailto:contact@fovea.cc)!
-
 ## Summary
 
 This plugin allows **In-App Purchases** to be made **from Construct** 3 games on iOS and Android.

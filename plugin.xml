@@ -78,11 +78,6 @@ SOFTWARE.
             <uses-permission android:name="com.android.vending.BILLING" />
         </config-file>
 
-        <source-file src="src/android/billing_key_param.xml" target-dir="res/values/" />
-        <config-file target="*/billing_key_param.xml" parent="/*">
-            <string name="billing_key_param">$BILLING_KEY</string>
-        </config-file>
-
         <!-- Cordova >= 3.0.0 -->
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="InAppBillingPlugin">
