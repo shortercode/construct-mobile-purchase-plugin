@@ -305,6 +305,20 @@ store.sandbox = false;
 // #include "refresh.js"
 // #include "set-key.js"
 
+///
+/// ## <a name="refresh"></a>*store.manageSubscriptions()*
+///
+/// (iOS only)
+///
+/// Opens the Manage Subscription page in iTunes.
+///
+/// ##### example usage
+///
+/// ```js
+///    store.manageSubscriptions();
+/// ```
+///
+
 // #include "log.js"
 
 /// # Random Tips

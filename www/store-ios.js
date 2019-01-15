@@ -448,7 +448,7 @@ store.Product = function(options) {
     ///  - `product.description` - Localized longer description
     this.description = options.description || options.localizedDescription || null;
 
-    ///  - `product.priceMicros` - Localized price, in micro-units. Available only on Android
+    ///  - `product.priceMicros` - Localized price, in micro-units (divide by 1000000 to get numeric price)
     this.priceMicros = options.priceMicros || null;
 
     ///  - `product.price` - Localized price, with currency symbol
@@ -456,6 +456,9 @@ store.Product = function(options) {
 
     ///  - `product.currency` - Currency code (optionaly)
     this.currency = options.currency || null;
+
+    ///  - `product.countryCode` - Country code. Available only on iOS
+    this.countryCode = options.countryCode || null;
 
     //  - `product.localizedTitle` - Localized name or short description ready for display
     // this.localizedTitle = options.localizedTitle || options.title || null;
@@ -1367,8 +1370,10 @@ store.validator = null;
 // Also makes sure to refresh the receipts.
 //
 store._validator = function(product, callback, isPrepared) {
-    if (!store.validator)
+    if (!store.validator) {
         callback(true, product);
+        return;
+    }
 
     if (store._prepareForValidation && isPrepared !== true) {
         store._prepareForValidation(product, function() {
@@ -1500,6 +1505,20 @@ store.setKey = function (publicKey) {
 			store.log.debug("Key set: " + publicKey);
 		}, publicKey);
 };
+
+///
+/// ## <a name="refresh"></a>*store.manageSubscriptions()*
+///
+/// (iOS only)
+///
+/// Opens the Manage Subscription page in iTunes.
+///
+/// ##### example usage
+///
+/// ```js
+///    store.manageSubscriptions();
+/// ```
+///
 
 (function(){
 "use strict";
@@ -2211,6 +2230,10 @@ InAppPurchase.prototype.restore = function() {
     exec('restoreCompletedTransactions', []);
 };
 
+InAppPurchase.prototype.manageSubscriptions = function () {
+    exec('manageSubscriptions', []);
+};
+
 /*
  * Requests all active downloads be paused
  */
@@ -2817,8 +2840,10 @@ function storekitLoaded(validProducts, invalidProductIds) {
         p.set({
             title: validProducts[i].title,
             price: validProducts[i].price,
+            priceMicros: validProducts[i].priceMicros,
             description: validProducts[i].description,
             currency: validProducts[i].currency,
+            countryCode: validProducts[i].countryCode,
             state: store.VALID
         });
         p.trigger("loaded");
@@ -3006,6 +3031,10 @@ function storekitError(errorCode, errorText, options) {
         message: errorText
     });
 }
+
+store.manageSubscriptions = function() {
+    storekit.manageSubscriptions();
+};
 
 // Restore purchases.
 // store.restore = function() {

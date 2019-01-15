@@ -2,8 +2,16 @@
 
 **Author**: Iain Shorter
 
-Forked from https://github.com/j3k0/cordova-plugin-purchase 
+Forked from https://github.com/j3k0/cordova-plugin-purchase
 Original Author: Jean-Christophe Hoelt - <hoelt@fovea.cc>
+
+**Active Contributors**:
+
+ * [Josef Fröhle](https://github.com/Dexus)
+
+---
+
+Need professional help and support? [Contact us](mailto:contact@fovea.cc)!
 
 ## Summary
 
@@ -83,7 +91,7 @@ You're all good? Time to read some more documentation. Hooray!
  - [Documentation for Android](doc/android.md)
  - [Documentation for Windows](doc/windows.md)
 
-## Resources
+## Extra Resources
 
 ### for iOS
 
@@ -103,6 +111,7 @@ You're all good? Time to read some more documentation. Hooray!
  * Matt Kane (initial iOS code)
  * Mohammad Naghavi (original unification attempt)
  * Dave Alden [@dpa99c](https://github.com/dpa99c)(Apple-hosted IAPs for iOS)
+ * Josef Fröhle
 
 ## Sponsors
 Big thanks to:

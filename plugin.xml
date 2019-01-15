@@ -26,12 +26,13 @@ SOFTWARE.
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="construct-mobile-purchase"
-    version="1.0.7">
+    version="1.1.0">
 
     <name>Purchase</name>
 	<description>Cordova Purchase plugin for iOS (AppStore), Android (PlayStore) and Windows</description>
     <engines>
-        <engine name="cordova" version=">=2.4.0" />
+        <engine name="cordova" version=">=6.0.0" />
+        <engine name="cordova-android" version=">=4.0.0" />
     </engines>
     <repo>https://github.com/j3k0/cordova-plugin-purchase.git</repo>
     <issue>https://github.com/j3k0/cordova-plugin-purchase/issues</issue>
@@ -72,25 +73,31 @@ SOFTWARE.
             <clobbers target="store" />
         </js-module>
 
-        <config-file target="AndroidManifest.xml" parent="/manifest">
+        <config-file target="AndroidManifest.xml" parent="/*">
             <!-- In-App Billing Permission -->
             <uses-permission android:name="com.android.vending.BILLING" />
+        </config-file>
+
+        <source-file src="src/android/billing_key_param.xml" target-dir="res/values/" />
+        <config-file target="*/billing_key_param.xml" parent="/*">
+            <string name="billing_key_param">$BILLING_KEY</string>
         </config-file>
 
         <!-- Cordova >= 3.0.0 -->
         <config-file target="res/xml/config.xml" parent="/*">
             <feature name="InAppBillingPlugin">
-				<param name="android-package" value="com.smartmobilesoftware.inappbilling.InAppBillingPlugin"/>
+				<param
+                    name="android-package"
+                    value="com.smartmobilesoftware.inappbilling.InAppBillingPlugin"
+                />
 			</feature>
         </config-file>
 
         <!-- In-app Billing Library -->
-		<source-file src="src/android/com/android/vending/billing/IInAppBillingService.aidl" target-dir="src/com/android/vending/billing" />
-		<source-file src="src/android/com/android/vending/billing/IInAppBillingService.aidl" target-dir="app/src/main/aidl/com/android/vending/billing" />
+        <source-file src="src/android/com/android/vending/billing/IInAppBillingService.aidl" target-dir="src/com/android/vending/billing" />
 
         <!-- cordova plugin src files -->
         <source-file src="src/android/com/smartmobilesoftware/inappbilling/InAppBillingPlugin.java" target-dir="src/com/smartmobilesoftware/inappbilling" />
-
 		<source-file src="src/android/com/smartmobilesoftware/util/Base64.java" target-dir="src/com/smartmobilesoftware/util" />
 		<source-file src="src/android/com/smartmobilesoftware/util/Base64DecoderException.java" target-dir="src/com/smartmobilesoftware/util" />
 		<source-file src="src/android/com/smartmobilesoftware/util/IabException.java" target-dir="src/com/smartmobilesoftware/util" />

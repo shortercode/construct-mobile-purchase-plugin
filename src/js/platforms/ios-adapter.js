@@ -228,8 +228,10 @@ function storekitLoaded(validProducts, invalidProductIds) {
         p.set({
             title: validProducts[i].title,
             price: validProducts[i].price,
+            priceMicros: validProducts[i].priceMicros,
             description: validProducts[i].description,
             currency: validProducts[i].currency,
+            countryCode: validProducts[i].countryCode,
             state: store.VALID
         });
         p.trigger("loaded");
@@ -417,6 +419,10 @@ function storekitError(errorCode, errorText, options) {
         message: errorText
     });
 }
+
+store.manageSubscriptions = function() {
+    storekit.manageSubscriptions();
+};
 
 // Restore purchases.
 // store.restore = function() {
