@@ -24,9 +24,10 @@ SOFTWARE.
 -->
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    id="cordova-plugin-purchase"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="construct-mobile-purchase"
-    version="1.1.0">
+    version="1.2.0">
 
     <name>Purchase</name>
 	<description>Cordova Purchase plugin for iOS (AppStore), Android (PlayStore) and Windows</description>
@@ -38,7 +39,7 @@ SOFTWARE.
     <issue>https://github.com/j3k0/cordova-plugin-purchase/issues</issue>
 
 	<license>MIT</license>
-    <keywords>cordova,phonegap,purchase,storekit,ios,android,play,appstore,windows</keywords>
+    <keywords>cordova,phonegap,purchase,purchases,storekit,billing,ios,android,play,appstore,windows,osx,macos</keywords>
 
     <!-- ios -->
     <platform name="ios">
@@ -61,6 +62,8 @@ SOFTWARE.
         <source-file src="src/ios/InAppPurchase.m" />
         <header-file src="src/ios/SKProduct+LocalizedPrice.h" />
         <source-file src="src/ios/SKProduct+LocalizedPrice.m" />
+        <header-file src="src/ios/SKProductDiscount+LocalizedPrice.h" />
+        <source-file src="src/ios/SKProductDiscount+LocalizedPrice.m" />
         <header-file src="src/ios/FileUtility.h" />
         <source-file src="src/ios/FileUtility.m" />
 
@@ -69,38 +72,28 @@ SOFTWARE.
 
     <!-- android -->
     <platform name="android">
-        <js-module src="www/store-android.js" name="InAppBillingPlugin">
-            <clobbers target="store" />
-        </js-module>
+      <js-module src="www/store-android.js" name="InAppBillingPlugin">
+        <clobbers target="store" />
+      </js-module>
+      <config-file target="AndroidManifest.xml" parent="/*">
+        <uses-permission android:name="com.android.vending.BILLING" />
+      </config-file>
 
-        <config-file target="AndroidManifest.xml" parent="/*">
-            <!-- In-App Billing Permission -->
-            <uses-permission android:name="com.android.vending.BILLING" />
-        </config-file>
+      <!-- Cordova >= 3.0.0 -->
+      <config-file target="res/xml/config.xml" parent="/*">
+        <feature name="InAppBillingPlugin">
+          <param
+            name="android-package"
+            value="cc.fovea.PurchasePlugin"
+            />
+        </feature>
+      </config-file>
 
-        <!-- Cordova >= 3.0.0 -->
-        <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="InAppBillingPlugin">
-				<param
-                    name="android-package"
-                    value="com.smartmobilesoftware.inappbilling.InAppBillingPlugin"
-                />
-			</feature>
-        </config-file>
-
-        <!-- In-app Billing Library -->
-        <source-file src="src/android/com/android/vending/billing/IInAppBillingService.aidl" target-dir="src/com/android/vending/billing" />
-
-        <!-- cordova plugin src files -->
-        <source-file src="src/android/com/smartmobilesoftware/inappbilling/InAppBillingPlugin.java" target-dir="src/com/smartmobilesoftware/inappbilling" />
-		<source-file src="src/android/com/smartmobilesoftware/util/Base64.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/Base64DecoderException.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/IabException.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/IabHelper.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/IabResult.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/Inventory.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/Purchase.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/Security.java" target-dir="src/com/smartmobilesoftware/util" />
-		<source-file src="src/android/com/smartmobilesoftware/util/SkuDetails.java" target-dir="src/com/smartmobilesoftware/util" />
+      <!-- To ensure we're using the latest version, see here:
+        https://developer.android.com/google/play/billing/billing_library_releases_notes -->
+      <framework src="com.android.billingclient:billing:2.0.3" />
+      <source-file src="src/android/cc/fovea/PurchasePlugin.java" target-dir="src/cc/fovea" />
+      <source-file src="src/android/cc/fovea/Constants.java" target-dir="src/cc/fovea" />
+      <source-file src="src/android/cc/fovea/Security.java" target-dir="src/cc/fovea" />
     </platform>
 </plugin>
