@@ -130,6 +130,17 @@ store.Product = function(options) {
     ///  - `product.trialPeriod` - Duration of the trial period for the subscription, in the units specified by the `trialPeriodUnit` property (windows only)
     ///  - `product.trialPeriodUnit` - Units of the trial period for a subscription (windows only)
 
+	// Some more fields set by [Fovea.Billing](https://billing.fovea.cc) receipt validator.
+	//  - `product.isBillingRetryPeriod` -
+	//  - `product.isTrialPeriod` -
+	//  - `product.isIntroPeriod` -
+	//  - `product.discountId` -
+	//  - `product.priceConsentStatus` -
+	//  - `product.renewalIntent` -
+	//  - `product.renewalIntentChangeDate` -
+	//  - `product.purchaseDate` -
+	//  - `product.cancelationReason` -
+
     this.stateChanged();
 };
 
@@ -234,6 +245,22 @@ store.Product.prototype.verify = function() {
                         var p = store.get(pid);
                         if (p) {
                             p.set('ineligibleForIntroPrice', true);
+                            store.log.debug('verify -> ' + pid + ' ineligibleForIntroPrice:true');
+                        }
+                    });
+                    store.products.forEach(function(p) {
+                        if (p.ineligibleForIntroPrice &&
+                            (data.ineligible_for_intro_price.indexOf(p.id) < 0)) {
+                            p.set('ineligibleForIntroPrice', false);
+                            store.log.debug('verify -> ' + p.id + ' ineligibleForIntroPrice:false');
+                        }
+                    });
+                }
+                if (data && data.collection && data.collection.forEach) {
+                    data.collection.forEach(function(purchase) {
+                        var p = store.get(purchase.id);
+                        if (p) {
+                            p.set(purchase);
                         }
                     });
                 }

@@ -532,6 +532,17 @@ store.Product = function(options) {
     ///  - `product.trialPeriod` - Duration of the trial period for the subscription, in the units specified by the `trialPeriodUnit` property (windows only)
     ///  - `product.trialPeriodUnit` - Units of the trial period for a subscription (windows only)
 
+	// Some more fields set by [Fovea.Billing](https://billing.fovea.cc) receipt validator.
+	//  - `product.isBillingRetryPeriod` -
+	//  - `product.isTrialPeriod` -
+	//  - `product.isIntroPeriod` -
+	//  - `product.discountId` -
+	//  - `product.priceConsentStatus` -
+	//  - `product.renewalIntent` -
+	//  - `product.renewalIntentChangeDate` -
+	//  - `product.purchaseDate` -
+	//  - `product.cancelationReason` -
+
     this.stateChanged();
 };
 
@@ -636,6 +647,22 @@ store.Product.prototype.verify = function() {
                         var p = store.get(pid);
                         if (p) {
                             p.set('ineligibleForIntroPrice', true);
+                            store.log.debug('verify -> ' + pid + ' ineligibleForIntroPrice:true');
+                        }
+                    });
+                    store.products.forEach(function(p) {
+                        if (p.ineligibleForIntroPrice &&
+                            (data.ineligible_for_intro_price.indexOf(p.id) < 0)) {
+                            p.set('ineligibleForIntroPrice', false);
+                            store.log.debug('verify -> ' + p.id + ' ineligibleForIntroPrice:false');
+                        }
+                    });
+                }
+                if (data && data.collection && data.collection.forEach) {
+                    data.collection.forEach(function(purchase) {
+                        var p = store.get(purchase.id);
+                        if (p) {
+                            p.set(purchase);
                         }
                     });
                 }
@@ -1623,15 +1650,20 @@ store._validator = function(product, callback, isPrepared) {
 ///
 
 ///
-/// ## <a name="verifyPurchases"></a> *store.verifyPurchases*
+/// ## <a name="update"></a> *store.update*
 ///
-/// Refresh the historical state of purchases. This is required to know if a
-/// user is eligible for promotions like introductory offers or subscription discount.
+/// Refresh the historical state of purchases and price of items.
+/// This is required to know if a user is eligible for promotions like introductory
+/// offers or subscription discount.
 ///
 /// It is recommended to call this method right before entering your in-app
 /// purchases or subscriptions page.
 ///
-store.verifyPurchases = function() {};
+/// You can of `update()` as a light version of `refresh()` that won't ask for the
+/// user password. Note that this method is called automatically for you on a few
+/// useful occasions, like when a subscription expires.
+///
+store.update = function() {};
 
 })();
 (function() {
@@ -1956,9 +1988,16 @@ store.products.reset = function() {
 })();
 (function() {
 
+var dateFields = ['expiryDate', 'purchaseDate', 'lastRenewalDate', 'renewalIntentChangeDate'];
 
 store.Product.prototype.set = function(key, value) {
     if (typeof key === 'string') {
+        if (dateFields.indexOf(key) >= 0 && !(value instanceof Date)) {
+            value = new Date(value);
+        }
+        if (key === 'isExpired' && value === true && this.owned) {
+            this.set('state', store.VALID);
+        }
         this[key] = value;
         if (key === 'state')
             this.stateChanged();
@@ -2492,6 +2531,29 @@ function restArguments(func, startIndex) {
 }
 
 })();
+// Add a polyfill for Object.assign in case it isn't supported (which is the case
+// on Android < 4.4), see https://github.com/auth0/auth0-cordova/issues/46 for reference
+if (typeof Object.assign != 'function') {
+    Object.assign = function (target, varArgs) {
+        'use strict';
+        if (target == null) {
+            throw new TypeError('Cannot convert undefined or null to object');
+        }
+        var to = Object(target);
+        for (var index = 1; index < arguments.length; index++) {
+            var nextSource = arguments[index];
+
+            if (nextSource != null) {
+                for (var nextKey in nextSource) {
+                    if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                        to[nextKey] = nextSource[nextKey];
+                    }
+                }
+            }
+        }
+        return to;
+    };
+}
 
 /*
  * Copyright (C) 2012-2013 by Guillaume Charhon
@@ -2976,7 +3038,6 @@ store.when("product", "finished", function(product) {
         );
     }
     else if (store.requireAcknowledgment && !product.acknowledged) {
-        product.transaction = null;
         store.inappbilling.acknowledgePurchase(
             function() { // success
                 store.log.debug("plugin -> purchase acknowledged");
@@ -3312,5 +3373,6 @@ if (window) {
     store.android = store.inappbilling;
 }
 
+store.platform = 'google';
 module.exports = store;
 

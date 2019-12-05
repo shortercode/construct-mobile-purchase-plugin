@@ -295,9 +295,13 @@ public class PurchasePlugin
           mBillingClient.queryPurchases(SkuType.SUBS);
         Log.i(mTag, "queryPurchases() -> Subscriptions elapsed time: "
             + (System.currentTimeMillis() - time) + "ms");
+        int purchasesListSize = -1;
+        if (subscriptionResult.getPurchasesList() != null) {
+            purchasesListSize = subscriptionResult.getPurchasesList().size();
+        }
         Log.i(mTag, "queryPurchases() -> Subscriptions result code: "
             + subscriptionResult.getResponseCode()
-            + " res: " + subscriptionResult.getPurchasesList().size());
+            + " res: " + purchasesListSize);
 
         if (subscriptionResult.getResponseCode() == BillingResponseCode.OK) {
           purchasesResult.getPurchasesList().addAll(
@@ -398,6 +402,11 @@ public class PurchasePlugin
         callSuccess();
         sendToListener("purchasesUpdated", new JSONObject()
             .put("purchases", toJSON(purchases)));
+      }
+      else if (code == BillingResponseCode.USER_CANCELED) {
+        Log.w(mTag, "onPurchasesUpdated() -> "
+            + "Cancelled: " + format(result));
+        callError(Constants.ERR_CANCELLED, codeToString(code));
       }
       else {
         Log.w(mTag, "onPurchasesUpdated() -> "

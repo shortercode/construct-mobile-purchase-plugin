@@ -553,6 +553,17 @@ store.Product = function(options) {
     ///  - `product.trialPeriod` - Duration of the trial period for the subscription, in the units specified by the `trialPeriodUnit` property (windows only)
     ///  - `product.trialPeriodUnit` - Units of the trial period for a subscription (windows only)
 
+	// Some more fields set by [Fovea.Billing](https://billing.fovea.cc) receipt validator.
+	//  - `product.isBillingRetryPeriod` -
+	//  - `product.isTrialPeriod` -
+	//  - `product.isIntroPeriod` -
+	//  - `product.discountId` -
+	//  - `product.priceConsentStatus` -
+	//  - `product.renewalIntent` -
+	//  - `product.renewalIntentChangeDate` -
+	//  - `product.purchaseDate` -
+	//  - `product.cancelationReason` -
+
     this.stateChanged();
 };
 
@@ -657,6 +668,22 @@ store.Product.prototype.verify = function() {
                         var p = store.get(pid);
                         if (p) {
                             p.set('ineligibleForIntroPrice', true);
+                            store.log.debug('verify -> ' + pid + ' ineligibleForIntroPrice:true');
+                        }
+                    });
+                    store.products.forEach(function(p) {
+                        if (p.ineligibleForIntroPrice &&
+                            (data.ineligible_for_intro_price.indexOf(p.id) < 0)) {
+                            p.set('ineligibleForIntroPrice', false);
+                            store.log.debug('verify -> ' + p.id + ' ineligibleForIntroPrice:false');
+                        }
+                    });
+                }
+                if (data && data.collection && data.collection.forEach) {
+                    data.collection.forEach(function(purchase) {
+                        var p = store.get(purchase.id);
+                        if (p) {
+                            p.set(purchase);
                         }
                     });
                 }
@@ -1644,15 +1671,20 @@ store._validator = function(product, callback, isPrepared) {
 ///
 
 ///
-/// ## <a name="verifyPurchases"></a> *store.verifyPurchases*
+/// ## <a name="update"></a> *store.update*
 ///
-/// Refresh the historical state of purchases. This is required to know if a
-/// user is eligible for promotions like introductory offers or subscription discount.
+/// Refresh the historical state of purchases and price of items.
+/// This is required to know if a user is eligible for promotions like introductory
+/// offers or subscription discount.
 ///
 /// It is recommended to call this method right before entering your in-app
 /// purchases or subscriptions page.
 ///
-store.verifyPurchases = function() {};
+/// You can of `update()` as a light version of `refresh()` that won't ask for the
+/// user password. Note that this method is called automatically for you on a few
+/// useful occasions, like when a subscription expires.
+///
+store.update = function() {};
 
 })();
 (function() {
@@ -1977,9 +2009,16 @@ store.products.reset = function() {
 })();
 (function() {
 
+var dateFields = ['expiryDate', 'purchaseDate', 'lastRenewalDate', 'renewalIntentChangeDate'];
 
 store.Product.prototype.set = function(key, value) {
     if (typeof key === 'string') {
+        if (dateFields.indexOf(key) >= 0 && !(value instanceof Date)) {
+            value = new Date(value);
+        }
+        if (key === 'isExpired' && value === true && this.owned) {
+            this.set('state', store.VALID);
+        }
         this[key] = value;
         if (key === 'state')
             this.stateChanged();
@@ -2513,6 +2552,29 @@ function restArguments(func, startIndex) {
 }
 
 })();
+// Add a polyfill for Object.assign in case it isn't supported (which is the case
+// on Android < 4.4), see https://github.com/auth0/auth0-cordova/issues/46 for reference
+if (typeof Object.assign != 'function') {
+    Object.assign = function (target, varArgs) {
+        'use strict';
+        if (target == null) {
+            throw new TypeError('Cannot convert undefined or null to object');
+        }
+        var to = Object(target);
+        for (var index = 1; index < arguments.length; index++) {
+            var nextSource = arguments[index];
+
+            if (nextSource != null) {
+                for (var nextKey in nextSource) {
+                    if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+                        to[nextKey] = nextSource[nextKey];
+                    }
+                }
+            }
+        }
+        return to;
+    };
+}
 
 /*
  * A plugin to enable iOS In-App Purchases.
@@ -3244,22 +3306,10 @@ function storekitLoad() {
     storekit.load(products, storekitLoaded, storekitLoadFailed);
 }
 
-//! ### <a name="storekitLoaded"></a> *storekitLoaded()*
-//!
-//! Update the `store`'s product definitions when they have been loaded.
-//!
-//!  1. Set the products state to `VALID` or `INVALID`
-//!  2. Trigger the "loaded" event
-//!  3. Set the products state to `OWNED` (if it is so)
-//!  4. Set the store status to "ready".
-//!
-function storekitLoaded(validProducts, invalidProductIds) {
-    store.log.debug("ios -> products loaded");
+function updateValidProducts(validProducts) {
     var p;
     for (var i = 0; i < validProducts.length; ++i) {
         p = store.products.byId[validProducts[i].id];
-        store.log.debug("ios -> product " + p.id + " is valid (" + p.alias + ")");
-        store.log.debug("ios -> owned? " + p.owned);
         var v = validProducts[i];
         p.set({
             title: v.title,
@@ -3279,8 +3329,29 @@ function storekitLoaded(validProducts, invalidProductIds) {
             billingPeriodUnit: v.billingPeriodUnit,
             discounts: v.discounts,
             group: v.group,
-            state: store.VALID
         });
+        p.trigger("updated");
+    }
+}
+
+//! ### <a name="storekitLoaded"></a> *storekitLoaded()*
+//!
+//! Update the `store`'s product definitions when they have been loaded.
+//!
+//!  1. Set the products state to `VALID` or `INVALID`
+//!  2. Trigger the "loaded" event
+//!  3. Set the products state to `OWNED` (if it is so)
+//!  4. Set the store status to "ready".
+//!
+function storekitLoaded(validProducts, invalidProductIds) {
+    store.log.debug("ios -> products loaded");
+    updateValidProducts(validProducts);
+    var p;
+    for (var i = 0; i < validProducts.length; ++i) {
+        p = store.products.byId[validProducts[i].id];
+        store.log.debug("ios -> product " + p.id + " is valid (" + p.alias + ")");
+        store.log.debug("ios -> owned? " + p.owned);
+        p.set("state", store.VALID);
         p.trigger("loaded");
         if (isOwned(p.id)) {
             if (p.type === store.NON_CONSUMABLE)
@@ -3302,7 +3373,7 @@ function storekitLoaded(validProducts, invalidProductIds) {
         loading = false;
         loaded = true;
         var ready = store.ready.bind(store, true);
-        store.verifyPurchases(ready, ready);
+        store.update(ready, ready, true);
     }, 1);
 }
 
@@ -3490,7 +3561,7 @@ store.when("re-refreshed", function() {
     storekit.restore();
     storekit.refreshReceipts(function(obj) {
         storekitSetAppProductFromReceipt(obj);
-        store.verifyPurchases();
+        store.update();
     });
 });
 
@@ -3652,8 +3723,11 @@ store._prepareForValidation = function(product, callback) {
     loadReceipts();
 };
 
-store.verifyPurchases = function(successCb, errorCb) {
-    store.log.debug("verifyPurchases()");
+store.update = function(successCb, errorCb, skipLoad) {
+    store.log.debug("update()");
+    if (!skipLoad) {
+        storekit.load(store.products.map(function(p) { return p.id; }), updateValidProducts);
+    }
     storekit.loadReceipts(function(data) {
         if (data && data.appStoreReceipt) {
             var p = storekitSetAppProductFromReceipt(data);
@@ -3691,7 +3765,7 @@ setInterval(function() {
         return product.owned && now > +product.expiryDate + 60000;
     });
     if (expired) {
-        store.verifyPurchases();
+        store.update();
     }
 }, 60000);
 
@@ -3770,5 +3844,6 @@ document.addEventListener("online", function() {
 
 })();
 
+store.platform = 'apple';
 module.exports = store;
 
