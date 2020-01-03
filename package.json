@@ -1,6 +1,6 @@
 {
   "name": "construct-mobile-purchase",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Construct 3 IAP plugin for iOS and Android (AppStore and PlayStore)",
   "cordova": {
     "id": "construct-mobile-purchase",

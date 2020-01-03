@@ -27,7 +27,7 @@ SOFTWARE.
     id="cordova-plugin-purchase"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="construct-mobile-purchase"
-    version="1.2.0">
+    version="1.2.1">
 
     <name>Purchase</name>
 	<description>Cordova Purchase plugin for iOS (AppStore), Android (PlayStore) and Windows</description>
